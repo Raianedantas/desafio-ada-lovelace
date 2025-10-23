@@ -76,12 +76,67 @@ Siga estas etapas para configurar o ambiente e executar os scripts.
     python pipeline.py
     ```
 
-###  Próximas Etapas
-Após a fase de exploração e extração, o próximo passo será o **Squad B (Transformações)**, responsável por padronizar datas, tratar nulos e calcular valores totais.
+##### 🚀 Nossa Equipe e Divisão de Tarefas
+
+Para organizar nosso fluxo de trabalho, dividimos o projeto em três Squads com focos de atuação distintos, baseados na ata de alinhamento do projeto. Cada squad teve autonomia para desenvolver suas soluções.
 
 ---
 
- **Autor: CAROLINA FREIRE E RAIANE** Squad A - Exploração & Extração  
+> ### 👩‍💻 SQUAD A – Exploração & Extração
+>
+> **Foco:** Preparar o ambiente, analisar os dados brutos, identificar problemas e construir a primeira etapa (`Extract`) do pipeline.
+>
+> **Membros:**
+> * [RAINE DANTAS](https://github.com/Raianedantas)
+> * [CAROLINA FREIRE](https://github.com/carolfsfreire)
+>
+> **Atribuições:**
+> * **A1 (Fácil):** Configuração do ambiente, repositório, `README` inicial e `requirements.txt`.
+> * **A2 (Fácil → Médio):** Análise exploratória de dados (EDA), filtros e ordenação.
+> * **A3 (Médio):** Criação da função `extract()` com logs e da estrutura base do pipeline.
+>
+> **Entregáveis:**
+> * `exploracao.py`
+> * `report_exploracao.md`
+> * `pipeline.py` (com a função `extract()`)
 
-git config --global user.name "CAROLINA"
-git config --global user.email "unhaca@gmail.com"
+---
+
+> ### 🛠️ SQUAD B – Transformações
+>
+> **Foco:** Limpar, tratar e enriquecer os dados. Esta é a etapa (`Transform`) onde a "mágica" da limpeza acontece.
+>
+> **Membros:**
+> * [GABRIELLY LIMA](https://github.com/gabrielly-slima/gabrielly-slima)
+> * [ALINE NASCIMENTO](https://github.com/alinelimx)
+> * [HELENA NOCERA]()
+>
+> **Atribuições:**
+> * **B1 (Médio):** Funções para padronizar datas (`padroniza_data`) e preencher valores nulos (`preenche_nulos`).
+> * **B2 (Médio):** Tratamento de preços negativos, criação da coluna `valor_total` e política de log de dados descartados.
+> * **B3 (Difícil):** Conversão da coluna `quantidade` (texto para int) e criação de testes unitários.
+>
+> **Entregáveis:**
+> * `transform.py`
+> * `tests/test_transform.py`
+
+---
+
+> ### 🗃️ SQUAD C – Carga, Modelo & Qualidade
+>
+> **Foco:** Carregar os dados limpos no banco de dados (`Load`), modelar as tabelas e garantir a qualidade final dos dados.
+>
+> **Membros:**
+> * [CAMILE SANTANA](https://github.com/ichcamile)
+> * [SOPHIA PERAZA](https://github.com/sopbit)
+> * [ANA CLARA RODRIGUES](https://github.com/DevAnaClara)
+>
+> **Atribuições:**
+> * **C1 (Médio):** Função `load(df)` para salvar os dados na tabela principal `tb_vendas`.
+> * **C2 (Difícil):** Normalização da `tb_clientes`, criação de Chave Estrangeira (FK) e definição da ordem de carga.
+> * **C3 (Difícil):** Implementação de validações (ex: Pandera), logging avançado e script SQL para consulta (`total_por_categoria.sql`).
+>
+> **Entregáveis:**
+> * `load.py`
+> * `schema.sql`
+> * `consultas/total_por_categoria.sql`

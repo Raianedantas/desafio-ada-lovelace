@@ -9,7 +9,7 @@ Original file is located at
 import pandas as pd
 import sqlite3
 
-df = pd.read_csv('/content/sample_data/vendas.csv', sep = ",")
+df = pd.read_csv('data/vendas.csv', sep = ",")
 # O Jupiter, deleta o arquivo do notebook, para ter segurança ao rodar o código, o arquivo está disponivel no
 # repositorio do projeto - https://github.com/Raianedantas/desafio-ada-lovelace/blob/main/schema.sql
 
@@ -30,7 +30,7 @@ Depois verificamos que tem dois tipos de formatos dentro das datas, uma que util
 print(df.dtypes)
 
 #transformar de texto para data
-df['data_venda'] = pd.to_datetime(df['data_venda'], format='mixed', errors='coerce')
+df['data_venda'] = pd.to_datetime(df['data_venda'], dayfirst=True, errors='coerce')
 
 """*   **Substituir valores nulos por "Não informado"**
 
@@ -68,11 +68,9 @@ mapa_numeros = {
     'um': 1, 'dois': 2, 'três': 3, 'quatro': 4, 'cinco': 5
 }
 
-#Substitui palavras por números
+# Substitui palavras por números
 df['quantidade'] = df['quantidade'].replace(mapa_numeros)
-
-# Converte para número inteiro
-df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce').astype(int)
+df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce').fillna(0).astype(int)
 
 df
 
@@ -101,7 +99,7 @@ print(df_filtrado)
 
 """Sabendo qual a coluna que possuia os valores negativos, utilizamos o método **abs()** para retornar o valor absoluto dos valores que estavam negativos. E, por fim, verificamos se algum valor ainda estava negativo e tivemos **False** como saída, alcançando nosso objetivo."""
 
-df['preco_unitario'] = df['preco_unitario'].abs()
+df['preco_unitario'] = pd.to_numeric(df['preco_unitario'], errors='coerce').abs().fillna(0.0)
 
 print((df['preco_unitario'] < 0).any())
 
@@ -115,8 +113,6 @@ Realizamos o cálculo da quantidade * preço unitário, adicionando a nova colun
 df['valor_total'] = df['quantidade'] * df['preco_unitario']
 
 df.head()
-
-import sqlite3
 
 conn = sqlite3.connect('vendas.db')
 
@@ -155,14 +151,40 @@ print("DataFrame 'df_vendas_final' (com FK) criado.")
 ARQUIVO_DB = 'vendas.db'
 
 conn = sqlite3.connect(ARQUIVO_DB)
+# garantir que foreign keys estão ativas
+conn.execute("PRAGMA foreign_keys = ON;")
 
-df_clientes.to_sql('tb_clientes', conn, if_exists='replace', index=False)
-print("Tabela 'tb_clientes' salva com sucesso.")
+# garantir que tabelas não existem antes de criar novamente
+conn.execute("DROP TABLE IF EXISTS tb_vendas;")
+conn.execute("DROP TABLE IF EXISTS tb_clientes;")
 
-df_vendas_final.to_sql('tb_vendas', conn, if_exists='replace', index=False)
-print("Tabela 'tb_vendas' salva com sucesso.")
+create_clientes = """
+CREATE TABLE IF NOT EXISTS tb_clientes (
+    id_cliente INTEGER PRIMARY KEY,
+    nome_cliente TEXT NOT NULL
+);
+"""
+create_vendas = """
+CREATE TABLE IF NOT EXISTS tb_vendas (
+    data_venda TIMESTAMP,
+    produto TEXT,
+    quantidade INTEGER,
+    preco_unitario REAL,
+    categoria TEXT,
+    valor_total REAL,
+    id_cliente INTEGER,
+    FOREIGN KEY (id_cliente) REFERENCES tb_clientes(id_cliente)
+);
+"""
 
-print(f"Dados carregados e normalizados em '{ARQUIVO_DB}'.")
+conn.execute(create_clientes)
+conn.execute(create_vendas)
+
+# escreva os dados: use if_exists='append' para que o CREATE TABLE acima seja mantido
+df_clientes.to_sql('tb_clientes', conn, if_exists='append', index=False)
+df_vendas_final.to_sql('tb_vendas', conn, if_exists='append', index=False)
+
+print("Tabelas criadas com FK e dados inseridos em", ARQUIVO_DB)
 
 query_sql = """
 SELECT
